@@ -1,0 +1,59 @@
+---
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+```{r include=FALSE}
+
+
+
+variable.t <- '{{variable}}'
+# variable.t="qn7"
+desc1 <- "{{desc1}}"
+
+final.data.s <- final.data %>% select(Age,Age_1,q2,q3,weight,stratum,psu, !!!sym(variable.t)) %>% as_survey_design(ids=psu, strata= stratum, weights = weight)
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+result <- final.data.s%>% mutate(Age=to_factor(final.data.s[["variables"]][["Age"]]),q2=to_factor(final.data.s[["variables"]][["q2"]])) %>% filter(!is.na(q2) & !is.na(Age)) %>% group_by(Age,q2) %>% summarise(n=sum(!is.na(!!!sym(variable.t))),out=round(survey_mean(!!!sym(variable.t),vartype = "ci",na.rm = T)*100,1)) %>% mutate(out_low=if_else(out_low<0,0,out_low),out_upp=if_else(out_upp>100,100,out_upp),CI=paste0("( ",out_low," , ",out_upp," )")) %>% select(Age,q2,n,out,CI)
+
+result_t <-  final.data.s%>% mutate(Age=to_factor(final.data.s[["variables"]][["Age"]])) %>% filter( !is.na(Age)) %>% group_by(Age) %>% summarise(n=sum(!is.na(!!!sym(variable.t))),out=round(survey_mean(!!!sym(variable.t),vartype = "ci",na.rm = T)*100,1)) %>% mutate(out_low=if_else(out_low<0,0,out_low),out_upp=if_else(out_upp>100,100,out_upp),CI=paste0("( ",out_low," , ",out_upp," )")) %>% select(Age,n,out,CI)
+###########################################################
+a <- final.data.s%>% mutate(q3=to_factor(final.data.s[["variables"]][["q3"]]),q2=to_factor(final.data.s[["variables"]][["q2"]])) %>% filter(!is.na(q2) & !is.na(q3)) %>% group_by(q3,q2) %>% summarise(n=sum(!is.na(!!!sym(variable.t))),out=round(survey_mean(!!!sym(variable.t),vartype = "ci",na.rm = T)*100,1)) %>% mutate(out_low=if_else(out_low<0,0,out_low),out_upp=if_else(out_upp>100,100,out_upp),CI=paste0("( ",out_low," , ",out_upp," )")) %>% select(q3,q2,n,out,CI)
+
+a_t <-  final.data.s%>% mutate(q3=to_factor(final.data.s[["variables"]][["q3"]])) %>% filter( !is.na(q3)) %>% group_by(q3) %>% summarise(n=sum(!is.na(!!!sym(variable.t))),out=round(survey_mean(!!!sym(variable.t),vartype = "ci",na.rm = T)*100,1)) %>% mutate(out_low=if_else(out_low<0,0,out_low),out_upp=if_else(out_upp>100,100,out_upp),CI=paste0("( ",out_low," , ",out_upp," )")) %>% select(q3,n,out,CI)
+###########################################################
+b <- final.data.s%>% mutate(q2=to_factor(final.data.s[["variables"]][["q2"]])) %>% filter(!is.na(q2) ) %>% group_by(q2) %>% summarise(n=sum(!is.na(!!!sym(variable.t))),out=round(survey_mean(!!!sym(variable.t),vartype = "ci",na.rm = T)*100,1)) %>% mutate(out_low=if_else(out_low<0,0,out_low),out_upp=if_else(out_upp>100,100,out_upp),CI=paste0("( ",out_low," , ",out_upp," )")) %>% select(q2,n,out,CI)
+
+b_t <-  final.data.s  %>% summarise(n=sum(!is.na(!!!sym(variable.t))),out=round(survey_mean(!!!sym(variable.t),vartype = "ci",na.rm = T)*100,1)) %>% mutate(out_low=if_else(out_low<0,0,out_low),out_upp=if_else(out_upp>100,100,out_upp),CI=paste0("( ",out_low," , ",out_upp," )")) %>% select(n,out,CI)
+
+####################################################
+
+c <- final.data.s%>% mutate(Age_1=to_factor(final.data.s[["variables"]][["Age_1"]]),q2=to_factor(final.data.s[["variables"]][["q2"]])) %>% filter(!is.na(q2) & !is.na(Age_1)) %>% group_by(Age_1,q2) %>% summarise(n=sum(!is.na(!!!sym(variable.t))),out=round(survey_mean(!!!sym(variable.t),vartype = "ci",na.rm = T)*100,1)) %>% mutate(out_low=if_else(out_low<0,0,out_low),out_upp=if_else(out_upp>100,100,out_upp),CI=paste0("( ",out_low," , ",out_upp," )")) %>% select(Age_1,q2,n,out,CI) %>% filter(Age_1=="13 to 17")
+
+c_t <-  final.data.s%>% mutate(Age_1=to_factor(final.data.s[["variables"]][["Age_1"]])) %>% filter( !is.na(Age_1)) %>% group_by(Age_1) %>% summarise(n=sum(!is.na(!!!sym(variable.t))),out=round(survey_mean(!!!sym(variable.t),vartype = "ci",na.rm = T)*100,1)) %>% mutate(out_low=if_else(out_low<0,0,out_low),out_upp=if_else(out_upp>100,100,out_upp),CI=paste0("( ",out_low," , ",out_upp," )")) %>% select(Age_1,n,out,CI)%>% filter(Age_1=="13 to 17")
+```
+
+### `r  desc1` :
+
+|       |                   |     |                     | Total                   |                   |     |                   |          Female          |                 |     |                   | Male                     |                 |
+|-------|-------------------|-----|---------------------|-------------------------|-------------------|-----|-------------------|:------------------------:|:---------------:|:---:|:-----------------:|--------------------------|:---------------:|
+|       |                   |     | Percentage          | 95% confidence interval | N                 |     | Percentage        | 95 % confidence interval |        N        |     |    Percentage     | 95 % confidence interval |        N        |
+|       | Total             |     | `r b_t$out[1]`      | `r b_t$CI[1]`           | `r b_t$n[1]`      |     | `r b$out[1]`      |       `r b$CI[1]`        |   `r b$n[1]`    |     |   `r b$out[2]`    | `r b$CI[2]`              |   `r b$n[2]`    |
+| Age   |                   |     |                     |                         |                   |     |                   |                          |                 |     |                   |                          |                 |
+|       | 12 or younger     |     | `r result_t$out[1]` | `r result_t$CI[1]`      | `r result_t$n[1]` |     | `r result$out[1]` |     `r result$CI[1]`     | `r result$n[1]` |     | `r result$out[2]` | `r result$CI[2]`         | `r result$n[2]` |
+|       | 13 - 15           |     | `r result_t$out[2]` | `r result_t$CI[2]`      | `r result_t$n[2]` |     | `r result$out[3]` |     `r result$CI[3]`     | `r result$n[3]` |     | `r result$out[4]` | `r result$CI[4]`         | `r result$n[4]` |
+|       | 16 or 17          |     | `r result_t$out[3]` | `r result_t$CI[3]`      | `r result_t$n[3]` |     | `r result$out[5]` |     `r result$CI[5]`     | `r result$n[5]` |     | `r result$out[6]` | `r result$CI[6]`         | `r result$n[6]` |
+|       | 13 - 17           |     | `r c_t$out[1]`      | `r c_t$CI[1]`           | `r c_t$n[1]`      |     | `r c$out[1]`      |       `r c$CI[1]`        |   `r c$n[1]`    |     |   `r c$out[2]`    | `r c$CI[2]`              |   `r c$n[2]`    |
+|       | 18 or older       |     | `r result_t$out[4]` | `r result_t$CI[4]`      | `r result_t$n[4]` |     | `r result$out[7]` |     `r result$CI[7]`     | `r result$n[7]` |     | `r result$out[8]` | `r result$CI[8]`         | `r result$n[8]` |
+| Grade |                   |     |                     |                         |                   |     |                   |                          |                 |     |                   |                          |                 |
+|       | Octavo (8)        |     | `r a_t$out[1]`      | `r a_t$CI[1]`           | `r a_t$n[1]`      |     | `r a$out[1]`      |       `r a$CI[1]`        |   `r a$n[1]`    |     |   `r a$out[2]`    | `r a$CI[2]`              |   `r a$n[2]`    |
+|       | Noveno (9)        |     | `r a_t$out[2]`      | `r a_t$CI[2]`           | `r a_t$n[2]`      |     | `r a$out[3]`      |       `r a$CI[3]`        |   `r a$n[3]`    |     |   `r a$out[4]`    | `r a$CI[4]`              |   `r a$n[4]`    |
+|       | Primer Curso (1)  |     | `r a_t$out[3]`      | `r a_t$CI[3]`           | `r a_t$n[3]`      |     | `r a$out[5]`      |       `r a$CI[5]`        |   `r a$n[5]`    |     |   `r a$out[6]`    | `r a$CI[6]`              |   `r a$n[6]`    |
+|       | Segundo Curso (2) |     | `r a_t$out[4]`      | `r a_t$CI[4]`           | `r a_t$n[4]`      |     | `r a$out[7]`      |       `r a$CI[7]`        |   `r a$n[7]`    |     |   `r a$out[8]`    | `r a$CI[8]`              |   `r a$n[8]`    |
+|       | Tercer Curso (3)  |     | `r a_t$out[5]`      | `r a_t$CI[5]`           | `r a_t$n[5]`      |     | `r a$out[9]`      |       `r a$CI[9]`        |   `r a$n[9]`    |     |   `r a$out[10]`   | `r a$CI[10]`             |   `r a$n[10]`   |

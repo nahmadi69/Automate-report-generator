@@ -1,0 +1,2 @@
+**Please do not change the "Table T3_q.rmd" file. 
+**If you want to change the result you should change the resources files and after that you have to "knite" the "Summary Table.rmd" file.
